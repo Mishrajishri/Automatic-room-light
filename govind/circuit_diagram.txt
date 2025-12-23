@@ -1,0 +1,151 @@
+================================================================================
+                    AUTOMATIC ROOM LIGHT CONTROLLER
+                         CIRCUIT DIAGRAM
+================================================================================
+
+COMPONENTS REQUIRED:
+-------------------
+1. Arduino Uno                    x1
+2. IR Sensor Module (FC-51)       x2
+3. 16x2 LCD Display (HD44780)     x1
+4. 10K Potentiometer              x1 (for LCD contrast)
+5. 5V Relay Module                x1
+6. Push Buttons                   x2
+7. 220Ω Resistor                  x1 (for LCD backlight, optional)
+8. Jumper Wires                   As needed
+9. Breadboard                     x1
+
+
+PIN CONNECTIONS:
+================
+
+16x2 LCD DISPLAY:
+-----------------
+  LCD Pin    →    Arduino Pin / Connection
+  ----------------------------------------
+  VSS (1)    →    GND
+  VDD (2)    →    5V
+  V0  (3)    →    Potentiometer middle pin (contrast)
+  RS  (4)    →    Pin 12
+  RW  (5)    →    GND
+  EN  (6)    →    Pin 11
+  D0  (7)    →    Not connected
+  D1  (8)    →    Not connected
+  D2  (9)    →    Not connected
+  D3  (10)   →    Not connected
+  D4  (11)   →    Pin 5
+  D5  (12)   →    Pin 4
+  D6  (13)   →    Pin 3
+  D7  (14)   →    Pin 2
+  A   (15)   →    5V (through 220Ω resistor, optional)
+  K   (16)   →    GND
+
+  * Potentiometer: One end to 5V, other end to GND, middle to LCD V0
+
+
+IR SENSORS (FC-51 or similar):
+------------------------------
+  IR Sensor 1 (Entry Side - Place OUTSIDE room):
+  VCC  →  5V
+  GND  →  GND
+  OUT  →  Pin 7
+
+  IR Sensor 2 (Exit Side - Place INSIDE room):
+  VCC  →  5V
+  GND  →  GND
+  OUT  →  Pin 8
+
+  * Place sensors 30cm apart at doorway
+  * Sensor 1 should be triggered first when someone ENTERS
+  * Sensor 2 should be triggered first when someone EXITS
+
+
+PUSH BUTTONS:
+-------------
+  +1 Button:
+  One terminal  →  Pin 9
+  Other terminal →  GND
+  (Using internal pull-up resistor)
+
+  Reset Button:
+  One terminal  →  Pin 10
+  Other terminal →  GND
+  (Using internal pull-up resistor)
+
+
+RELAY MODULE (5V):
+------------------
+  VCC     →  5V
+  GND     →  GND
+  IN/SIG  →  Pin 6
+
+  Relay Output Side:
+  COM (Common)        →  AC Live wire from switch
+  NO (Normally Open)  →  To Light bulb
+  NC (Normally Closed)→  Not used
+
+
+CIRCUIT LAYOUT:
+===============
+
+                                    +----[IR1]----+
+                                    |   (Entry)   |
+    +-------+                       |             |
+    |       |                       +----[30cm]---+
+    | ROOM  |    <-- DOORWAY -->              
+    |       |                       +----[30cm]---+
+    +-------+                       |             |
+                                    |   (Exit)    |
+                                    +----[IR2]----+
+
+
+WIRING DIAGRAM (ASCII):
+=======================
+
+                            ARDUINO UNO
+                         +--------------+
+                         |              |
+        LCD RS ---------|12          5V|-----+-- IR1 VCC
+        LCD EN ---------|11            |     +-- IR2 VCC
+                        |10    GND     |     +-- LCD VDD
+    Reset Btn -----+----|              |     +-- Relay VCC
+                   |    |9             |     +-- Pot end
+      +1 Btn ----+-|----|              |
+                 | |    |8         GND |-----+-- IR1 GND
+        IR2 OUT--|+|----|              |     +-- IR2 GND
+        IR1 OUT--|++----|7             |     +-- LCD VSS, RW
+                        |6             |     +-- Relay GND
+    Relay IN -----------|              |     +-- Pot end
+        LCD D4 ---------|5             |     +-- Buttons
+        LCD D5 ---------|4             |
+        LCD D6 ---------|3             |
+        LCD D7 ---------|2             |
+                        +--------------+
+
+
+IMPORTANT NOTES:
+================
+1. IR sensors output LOW when object is detected (for most modules)
+2. If your IR sensor outputs HIGH on detection, change the code:
+   - Change: digitalRead(IR1_PIN) == LOW  
+   - To:     digitalRead(IR1_PIN) == HIGH
+
+3. Relay module: Most relay modules are ACTIVE LOW or ACTIVE HIGH
+   - If light behaves opposite, swap HIGH/LOW in updateLight() function
+
+4. Sensor placement is CRITICAL:
+   - Test which sensor triggers first when you enter/exit
+   - Swap IR1 and IR2 pins if direction detection is reversed
+
+5. Adjust TIMEOUT in code if detection is inconsistent (default: 2000ms)
+
+
+SAFETY WARNING:
+===============
+⚠️  The relay controls AC mains voltage (220V/110V)
+⚠️  Ensure proper insulation and connections
+⚠️  If unsure, consult an electrician
+⚠️  Never work on live circuits
+
+
+================================================================================
